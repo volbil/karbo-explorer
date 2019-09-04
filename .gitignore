@@ -1,0 +1,8 @@
+*/**/__pycache__/*
+__pycache__/
+venv/*
+config.py
+
+# misc
+.DS_STORE
+.vscode
