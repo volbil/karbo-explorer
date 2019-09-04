@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="Karbo Blockchain Explorer">
+		<link rel="shortcut icon" href="/static/favicon.ico" />
+
+		<title>Alternative Block Explorer</title>
+		
+		<link href="https://fonts.googleapis.com/css?family=Fira+Code&display=swap" rel="stylesheet">
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" rel="stylesheet" type="text/css">
+
+		<link href="/static/css/explorer.bootstrap.css" rel="stylesheet">
+		<link href="/static/css/entypo/entypo.css" rel="stylesheet">
+
+		<script src="https://code.highcharts.com/highcharts.src.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+		<style>
+			.logo {
+				width: 30px;
+				height: 30px;
+			}
+			.monospace-font {
+				font-family: 'Fira Code', monospace;
+				font-size: 15px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="wrapper">
+			<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+				<a class="sidebar-brand d-flex align-items-center justify-content-center" href="#/">
+					<div class="sidebar-brand-icon">
+						<img src="/static/logo.svg" class="logo">
+					</div>
+					<div class="sidebar-brand-text mx-3">Explorer</div>
+				</a>
+
+				<hr class="sidebar-divider my-0">
+
+				<li class="nav-item active">
+					<a class="nav-link" href="#/">
+						<i class="entypo home"></i>
+						<span>Network Stats</span>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">
+						<i class="entypo globe"></i>
+						<span>Nodes</span>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">
+						<i class="entypo cloud"></i>
+						<span>Pools</span></a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse-tools" aria-expanded="true" aria-controls="collapse-tools">
+						<i class="entypo lab-flask"></i>
+						<span>Tools</span>
+					</a>
+					<div id="collapse-tools" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+						<div class="bg-white py-2 collapse-inner rounded">
+							<h6 class="collapse-header">Advanced Tools:</h6>
+							<a class="collapse-item" href="#">Check Balance Proof</a>
+							<a class="collapse-item" href="#">Verify Message</a>
+							<a class="collapse-item" href="#">Validate Address</a>
+							<a class="collapse-item" href="#">Paper Wallet</a>
+						</div>
+					</div>
+				</li>
+
+				<hr class="sidebar-divider d-none d-md-block">
+
+				<div class="text-center d-none d-md-inline">
+					<button class="rounded-circle border-0" id="sidebarToggle"></button>
+				</div>
+			</ul>
+
+			<div id="content-wrapper" class="d-flex flex-column">
+				<div id="content">
+					<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+						<button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+							<i class="entypo chevron-left"></i>
+						</button>
+
+						<form class="d-none d-sm-inline-block form-inline mr-auto my-2 my-md-0 mw-100 navbar-search">
+							<div class="input-group">
+								<input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+								<div class="input-group-append">
+									<button class="btn btn-primary" type="button">
+										<i class="entypo search"></i>
+									</button>
+								</div>
+							</div>
+						</form>
+					</nav>
+
+					
+
+					<div class="container-fluid">
+
+						<div id="message-popup" class="alert alert-primary mt-3 mb-0 shadow mb-4 d-none" role="alert"></div>
+
+						<div id="homepage" class="router-page">
+							<div class="row">
+								<div class="col-xl-3 col-md-6 mb-4">
+									<div class="card border-left-primary shadow h-100 py-2">
+										<div class="card-body">
+											<div class="row no-gutters align-items-center">
+												<div class="col mr-2">
+													<div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Height</div>
+													<div id="stats-height" class="h5 mb-0 font-weight-bold text-gray-800">
+														0
+													</div>
+												</div>
+												<div class="col-auto">
+													<i class="entypo grid fz-2x text-gray-300"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-xl-3 col-md-6 mb-4">
+									<div class="card border-left-success shadow h-100 py-2">
+										<div class="card-body">
+											<div class="row no-gutters align-items-center">
+												<div class="col mr-2">
+													<div class="text-xs font-weight-bold text-success text-uppercase mb-1">Hashrate</div>
+													<div id="stats-hashrate" class="h5 mb-0 font-weight-bold text-gray-800">
+														0 H/s
+													</div>
+												</div>
+												<div class="col-auto">
+													<i class="entypo area-graph fz-2x text-gray-300"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-xl-3 col-md-6 mb-4">
+									<div class="card border-left-warning shadow h-100 py-2">
+										<div class="card-body">
+											<div class="row no-gutters align-items-center">
+												<div class="col mr-2">
+													<div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Block Reward</div>
+													<div id="stats-reward" class="h5 mb-0 font-weight-bold text-gray-800">
+														0
+													</div>
+												</div>
+												<div class="col-auto">
+													<i class="entypo wallet fz-2x text-gray-300"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-xl-3 col-md-6 mb-4">
+									<div class="card border-left-danger shadow h-100 py-2">
+										<div class="card-body">
+											<div class="row no-gutters align-items-center">
+												<div class="col mr-2">
+													<div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Mempool Transactions</div>
+													<div id="stats-mempool" class="h5 mb-0 font-weight-bold text-gray-800">
+														0
+													</div>
+												</div>
+												<div class="col-auto">
+													<i class="entypo hour-glass fz-2x text-gray-300"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- ToDo -->
+							<!-- <div class="row">
+								<div class="col-xl-8 col-lg-7">
+									<div class="card shadow mb-4">
+										<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+											<h6 class="m-0 font-weight-bold text-primary">Network Chart</h6>
+											<div class="dropdown no-arrow">
+												<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+													<i class="entypo pie-chart text-gray-400"></i>
+												</a>
+												<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+													<div class="dropdown-header">Dropdown Header:</div>
+													<a class="dropdown-item" href="#">Action</a>
+													<a class="dropdown-item" href="#">Another action</a>
+													<div class="dropdown-divider"></div>
+													<a class="dropdown-item" href="#">Something else here</a>
+												</div>
+											</div>
+										</div>
+										<div class="card-body">
+											1234 <br>
+											5678
+										</div>
+									</div>
+								</div>
+
+								<div class="col-xl-4 col-lg-5">
+									<div class="card shadow mb-4">
+										<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+											<h6 class="m-0 font-weight-bold text-primary">Stats</h6>
+											<div class="dropdown no-arrow">
+												<a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+													<i class="entypo text text-gray-400"></i>
+												</a>
+												<div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+													<div class="dropdown-header">Dropdown Header:</div>
+													<a class="dropdown-item" href="#">Action</a>
+													<a class="dropdown-item" href="#">Another action</a>
+													<div class="dropdown-divider"></div>
+													<a class="dropdown-item" href="#">Something else here</a>
+												</div>
+											</div>
+										</div>
+										<div class="card-body">
+											134
+										</div>
+									</div>
+								</div>
+							</div> -->
+
+							<div class="row">
+								<div class="col-12">
+									<div id="blocks" class="card shadow mb-4">
+										<div class="table-responsive">
+											<table class="table table-borderless table-md table-striped text-center mb-0">
+												<thead>
+													<tr>
+														<th scope="col">Height</th>
+														<th scope="col">Date & time</th>
+														<th scope="col">Block Hash</th>
+														<th scope="col">Difficulty</th>
+														<th scope="col">Transactions</th>
+													</tr>
+												</thead>
+												<tbody id="blocks-table">
+													
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div id="block" class="router-page">
+
+							<div class="row">
+								<div class="col-12">
+									<div class="card shadow h-100 py-2">
+										<div class="card-body">
+											<div id="block-info" class="row no-gutters"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div id="block-transactions"></div>
+						</div>
+					</div>
+				</div>
+
+				<footer class="sticky-footer bg-white">
+					<div class="container my-auto">
+						<div class="container text-center">
+							Made with <span class="entypo heart text-danger" style="font-size: 16px;"></span> by <a target="_blank" href="https://github.com/volbil/blockchain-explorer">Volbil</a>
+						</div>
+					</div>
+				</footer>
+			</div>
+		</div>
+		<script>
+			// Error messages
+			var errorMessages = {
+				"backend-not-available": "Seams like backend is not available :(",
+				"no-block-specified": "You must specify blocks!",
+				"blocks-load-error": "There was an error while trying to fetch block hash!",
+				"not-valid-address": "You must specify valid address!",
+				"search-error": "Search request failed :("
+			}
+
+			// SPA router function
+			function routePage() {
+				var urlParams = readParams()
+				if (window.location.hash == "") {
+					window.location.hash = "#/"
+				}
+
+				if (urlParams[0] == "#") {
+					var pageName = urlParams[1] != "" ? urlParams[1] : "homepage"
+					var templateName = "#" + pageName
+					
+					if ($(".router-page:visible").attr("id") != urlParams[1]) {
+						$('div.router-page').hide()
+						if ($(templateName).length) {
+							$(templateName).show()
+						}
+					}
+
+					switch(pageName) {
+						// Home page ¯\_(ツ)_/¯
+						case 'homepage':
+							setTitle("Home Page")
+							displayHome()
+
+							break
+
+						case 'block':
+							var block_hash = urlParams[2]
+							var data_block_hash = $("#block-info .block-hash").text()
+							var data_block_height = $("#block-info .block-height").text()
+							if (block_hash != undefined && block_hash.length == 64) {
+								if (data_block_hash != urlParams[2]) {
+									blockInfo(block_hash).then(function(data) {
+										if (data.error == undefined) {
+											setTitle("Block #" + data.data.height)
+											displayBlockInfo(data.data)
+										} else {
+											showMessage(errorMessages["blocks-not-found"])
+											switchPage()
+										}
+									})
+								} else {
+									setTitle("Block #" + data_block_height.trim())
+								}
+							} else {
+								showMessage(errorMessages["no-block-specified"])
+								switchPage()
+							}
+
+							break
+
+						default:
+							switchPage()
+
+							break
+					}
+				}
+			}
+
+			function displayBlockInfo(data) {
+				$("#block-info").empty()
+				$("#block-transactions").empty()
+				content = `
+					<div class="col-12">
+						<b>Block Hash</b>
+						<div class="float-md-right">
+							<span class="ilpnno block-hash">
+								${data.hash}
+							</span>
+						</div>
+						<hr/>
+					</div>
+					<div class="col-md-6 col-sm-12">
+						<b>Transactions</b>
+						<div class="float-right">
+							${data.tx_count}
+						</div>
+						<hr/>
+					</div>
+					<div class="col-md-6 col-sm-12">
+						<b>Block Reward</b>
+						<div class="float-right">
+							${data.reward} KRB
+						</div>
+						<hr/>
+					</div>
+					<div class="col-md-6 col-sm-12">
+						<b>Height</b>
+						<div class="float-right block-height">
+							${data.height}
+						</div>
+						<hr/>
+					</div>
+					<div class="col-md-6 col-sm-12">
+						<b>Date & Time</b>
+						<div class="float-right">
+							${timeFormat(data.timestamp)}
+						</div>
+						<hr/>
+					</div>
+					<div class="col-md-6 col-sm-12">
+						<b>Size</b>
+						<div class="float-right">
+							${data.size}
+						</div>
+						<hr class="d-md-none"/>
+					</div>
+					<div class="col-md-6 col-sm-12">
+						<b>Difficulty</b>
+						<div class="float-right">
+							${Math.floor(data.difficulty)}
+						</div>
+					</div>`
+
+				$("#block-info").html(content)
+
+				// displayTransactions($("#block-transactions"), data.tx)
+			}
+
+			function initRouter() {
+				routePage()
+				window.router = false
+				$(window).on('hashchange', routePage)
+				if (window.location.hash) {
+					if (window.router) {
+						$(window).trigger('hashchange')
+					}
+					window.router = true
+				}
+			}
+
+			// Switch router page
+			function switchPage(url = "", params = []) {
+				params = params.length > 0 ? "/" + params.join("/") : ""
+				window.location.hash = "#" + "/" + url + params;
+			}
+
+			// Read URL params
+			function readParams() {
+				return window.location.hash.split('/')
+			}
+
+			// Set window title
+			function setTitle(title) {
+				document.title = title + ' | Alternative Block Explorer';
+			}
+
+			function showMessage(message) {
+				$("#message-popup").text(message)
+				$("#message-popup").removeClass("d-none")
+				setTimeout(function() {
+					$("#message-popup").addClass("d-none")
+				}, 3400);
+			}
+
+			// Convert amount of hashes to readable form
+			function convertHashes(hashes) {
+				if (hashes >= 1000000000000000000000) {
+					return (hashes / 1000000000000000000000).toFixed(2) + ' Zh/s'
+				} else if (hashes >= 1000000000000000000) {
+					return (hashes / 1000000000000000000).toFixed(2) + ' Eh/s'
+				} else if (hashes >= 1000000000000000) {
+					return (hashes / 1000000000000000).toFixed(2) + ' Ph/s'
+				} else if (hashes >= 1000000000000) {
+					return (hashes / 1000000000000).toFixed(2) + ' Th/s'
+				} else if (hashes >= 1000000000) {
+					return (hashes / 1000000000).toFixed(2) + ' Gh/s'
+				} else if (hashes >= 1000000) {
+					return (hashes / 1000000).toFixed(2) + ' Mh/s'
+				} else if (hashes >= 1000) {
+					return (hashes / 1000).toFixed(2) + ' Kh/s'
+				} else {
+					return hashes + ' H/s'
+				}
+			}
+
+			function getSorted(selector, attrName) {
+				return $($(selector).toArray().sort(function(a, b){
+					var aVal = parseInt(a.getAttribute(attrName)),
+						bVal = parseInt(b.getAttribute(attrName));
+					return bVal - aVal ;
+				}));
+			}
+
+			function timeFormat(timestamp) {	 
+				var months_arr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+				var date = new Date(timestamp * 1000)
+				var year = date.getFullYear()
+				var month = months_arr[date.getMonth()]
+				var day = date.getDate()
+				var hours = date.getHours()
+				var minutes = "0" + date.getMinutes()
+				var seconds = "0" + date.getSeconds()
+				var convdataTime = month+'-'+day+'-'+year+' '+hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2)
+
+				return convdataTime
+			}
+
+			// Get current network info
+			function getInfo() {
+				return Promise.resolve($.ajax({
+					url: "/api/getinfo",
+				})).then(function(data) {
+					return data
+				})
+			}
+
+			// Get blocks range
+			function blocksRange(height) {
+				return Promise.resolve($.ajax({
+					url: "/api/range/" + height,
+				})).then(function(data) {
+					return data
+				})
+			}
+
+			// Get blocks range
+			function blockInfo(hash) {
+				return Promise.resolve($.ajax({
+					url: "/api/block/" + hash,
+				})).then(function(data) {
+					return data
+				})
+			}
+
+			// Display stuffs here~
+			function displayHome() {
+				getInfo().then(function(data) {
+					if (data.error == undefined) {
+						$("#stats-height").text(String(data.data.height).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"))
+						$("#stats-reward").text(data.data.reward)
+						$("#stats-mempool").text(data.data.mempool)
+						$("#stats-hashrate").text(convertHashes(data.data.hashrate))
+
+						displayBlocks(data.data.height - 1)
+					} else {
+						showMessage(errorMessages["backend-not-available"])
+					}
+				})
+			}
+
+			function displayBlocks(start_height) {
+				blocksRange(start_height).then(function(data) {
+					if (data.error == undefined) {
+						var blocks = data.data.blocks
+						blocks.forEach(function(block) {
+							if ($('tr[data-height="' + block.height + '"]').length == 0) {
+								var content = `
+								<tr data-height="${block.height}" class="monospace-font">
+									<td>
+										<a href="#/height/${block.height}">
+											${block.height}
+										</a>
+									</td>
+									<td>${timeFormat(block.timestamp)}</td>
+									<td>
+										<a href="#/block/${block.hash}">
+											${block.hash}
+										</a>
+									</td>
+									<td>
+										${block.difficulty}
+									</td>
+									<td>
+										${block.tx_count}
+									</td>
+								</tr>`
+
+								$("#blocks-table").append(content)
+								if ($("tr[data-height]").last().attr("data-height") <= 1) {
+									$("#more").addClass("d-none")
+								}
+							}
+						})
+						$("#blocks-table").html(getSorted("tr[data-height]", "data-height"))
+					} else {
+						showMessage(errorMessages["backend-not-available"])
+					}
+				})
+			}
+
+			$(document).ready(function() {
+				initRouter()
+
+				// Toggle the side navigation
+				$("#sidebarToggle, #sidebarToggleTop").on('click', function(e) {
+					$("body").toggleClass("sidebar-toggled");
+					$(".sidebar").toggleClass("toggled");
+					if ($(".sidebar").hasClass("toggled")) {
+						$('.sidebar .collapse').collapse('hide');
+					};
+				});
+
+				// Close any open menu accordions when window is resized below 768px
+				$(window).resize(function() {
+					if ($(window).width() < 768) {
+						$('.sidebar .collapse').collapse('hide');
+					};
+				});
+			})
+		</script>
+	</body>
+</html>
